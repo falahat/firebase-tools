@@ -190,22 +190,19 @@ describe("secrets", () => {
       );
     });
 
-    it("appends original message for 403 errors", async () => {
-      gcsm.getSecret.withArgs("project", "secret").rejects(new Error("Forbidden"));
+    it("surfaces the underlying message for unexpected errors", async () => {
+      // A billing-disabled project 403s here; the API's own message explains why,
+      // so it must not be swallowed.
+      const original = new FirebaseError(
+        "HTTP Error: 403, This API method requires billing to be enabled.",
+        { status: 403 },
+      );
+      gcsm.getSecret.withArgs("project", "secret").rejects(original);
 
-      await expect(secrets.upsertSecret("project", "secret")).to.be.rejectedWith("Unexpected error loading secret: Forbidden");
-    });
-
-    it("appends original message for 400 errors", async () => {
-      gcsm.getSecret.withArgs("project", "secret").rejects(new Error("Bad Request"));
-
-      await expect(secrets.upsertSecret("project", "secret")).to.be.rejectedWith("Unexpected error loading secret: Bad Request");
-    });
-
-    it("appends original message for other errors", async () => {
-      gcsm.getSecret.withArgs("project", "secret").rejects(new Error("Internal Error"));
-
-      await expect(secrets.upsertSecret("project", "secret")).to.be.rejectedWith("Unexpected error loading secret: Internal Error");
+      await expect(secrets.upsertSecret("project", "secret")).to.be.rejectedWith(
+        "Unexpected error loading secret: HTTP Error: 403, This API method requires billing to be enabled.",
+      );
+      expect(gcsm.createSecret).to.not.have.been.called;
     });
   });
 

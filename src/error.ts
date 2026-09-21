@@ -117,8 +117,7 @@ export function isBillingError(e: {
   return !!e.context?.body?.error?.details?.find((d) => {
     return (
       d.violations?.find((v) => v.type === "serviceusage/billing-enabled") ||
-      d.reason === "UREQ_PROJECT_BILLING_NOT_FOUND" ||
-      d.reason === "BILLING_DISABLED"
+      d.reason === "UREQ_PROJECT_BILLING_NOT_FOUND"
     );
   });
 }

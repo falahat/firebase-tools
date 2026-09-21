@@ -1,0 +1,1 @@
+- [fixed] Surface the underlying API error instead of masking it with a generic message.
